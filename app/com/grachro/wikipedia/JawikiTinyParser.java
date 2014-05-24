@@ -3,6 +3,8 @@ package com.grachro.wikipedia;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -15,14 +17,11 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * 概要
- * Wikipediaで配布されているコンテンツxmlから、タイトルとカテゴリを抜出す超簡易パーサです
+ * 概要 Wikipediaで配布されているコンテンツxmlから、タイトルとカテゴリを抜出す超簡易パーサです
  * 
- * 使い方
- * wget http://dumps.wikimedia.org/jawiki/20140503/jawiki-20140503-pages-meta-current.xml.bz2
- * bunzip2 jawiki-20140503-pages-meta-current.xml.bz2
- * JawikiTinyParserを実行
- *
+ * 対象データ
+ * wget http://dumps.wikimedia.org/jawiki/20140503/jawiki-20140503-pages-meta
+ * -current.xml.bz2 bunzip2 jawiki-20140503-pages-meta-current.xml.bz2
  */
 public class JawikiTinyParser extends DefaultHandler {
 
@@ -36,10 +35,12 @@ public class JawikiTinyParser extends DefaultHandler {
 		parser.parse(new File(filePath), new JawikiTinyParser());
 	}
 
-	boolean titleTag = false;
-	boolean nsTag = false;
-	boolean idTag = false;
-	boolean textTag = false;
+	private Pattern CATEGORY_PATTERN = Pattern.compile("\\[\\[Category:.+?\\]\\]");
+
+	private boolean titleTag = false;
+	private boolean nsTag = false;
+	private boolean idTag = false;
+	private boolean textTag = false;
 
 	private String currentTitle = "";
 	private String currentNameSpace = "-1";
@@ -71,6 +72,15 @@ public class JawikiTinyParser extends DefaultHandler {
 			LineIterator itr = IOUtils.lineIterator(new StringReader(contents));
 			while (itr.hasNext()) {
 				String line = itr.next();
+				if (line.indexOf("[[Category") == -1) {
+					continue;
+				}
+				Matcher matcher = CATEGORY_PATTERN.matcher("line");
+				while (matcher.find()) {
+					String category = matcher.group();
+					System.out.println("¥t" + category);
+				}
+
 				if (line.startsWith("[[Category")) {
 					System.out.println("¥t" + line);
 				}
