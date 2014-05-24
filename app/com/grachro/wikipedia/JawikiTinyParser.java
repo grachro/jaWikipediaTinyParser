@@ -2,6 +2,7 @@ package com.grachro.wikipedia;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.xml.sax.Attributes;
@@ -17,22 +19,23 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * 概要 Wikipediaで配布されているコンテンツxmlから、タイトルとカテゴリを抜出す超簡易パーサです
+ * 概要 Wikipediaで配布されているコンテンツxmlから、タイトルとカテゴリを抜出す簡易パーサです
  * 
  * 対象データ
- * wget http://dumps.wikimedia.org/jawiki/20140503/jawiki-20140503-pages-meta
- * -current.xml.bz2 bunzip2 jawiki-20140503-pages-meta-current.xml.bz2
+ * 
+ * <pre>
+ * wget http://dumps.wikimedia.org/jawiki/20140503/jawiki-20140503-pages-meta-current.xml.bz2
+ * bunzip2 jawiki-20140503-pages-meta-current.xml.bz2
+ * </pre>
  */
 public class JawikiTinyParser extends DefaultHandler {
 
 	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {
 
-		String filePath = args[0];
+		String inputXml = args[0];
+		String outputFile = args[1];
 
-		SAXParserFactory spfactory = SAXParserFactory.newInstance();
-		SAXParser parser = spfactory.newSAXParser();
-
-		parser.parse(new File(filePath), new JawikiTinyParser());
+		new JawikiTinyParser(inputXml, outputFile);
 	}
 
 	private Pattern CATEGORY_PATTERN = Pattern.compile("\\[\\[Category:.+?\\]\\]");
@@ -46,6 +49,37 @@ public class JawikiTinyParser extends DefaultHandler {
 	private String currentNameSpace = "-1";
 	private String currentId = "-1";
 	private StringBuilder currentPageContents = new StringBuilder();
+
+	private int counter = 0;
+	private OutputStream out;
+
+	public JawikiTinyParser(String inputXml, String outputFile) throws ParserConfigurationException, SAXException, IOException {
+		SAXParserFactory spfactory = SAXParserFactory.newInstance();
+		SAXParser parser = spfactory.newSAXParser();
+
+		this.out = FileUtils.openOutputStream(new File(outputFile));
+		try {
+			parser.parse(new File(inputXml), this);
+		} finally {
+			IOUtils.closeQuietly(out);
+		}
+	}
+
+	private void writeLine(String line) {
+		try {
+			IOUtils.write(line + "\n", out);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private void writeTab() {
+		try {
+			IOUtils.write("\t", out);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) {
@@ -66,7 +100,7 @@ public class JawikiTinyParser extends DefaultHandler {
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		if (this.textTag) {
 			String output = "id=" + this.currentId + ",namespace=" + this.currentNameSpace + ",title=" + this.currentTitle;
-			System.out.println(output);
+			writeLine(output);
 
 			String contents = this.currentPageContents.toString();
 			LineIterator itr = IOUtils.lineIterator(new StringReader(contents));
@@ -75,15 +109,17 @@ public class JawikiTinyParser extends DefaultHandler {
 				if (line.indexOf("[[Category") == -1) {
 					continue;
 				}
-				Matcher matcher = CATEGORY_PATTERN.matcher("line");
+				Matcher matcher = CATEGORY_PATTERN.matcher(line);
 				while (matcher.find()) {
 					String category = matcher.group();
-					System.out.println("¥t" + category);
+					writeTab();
+					writeLine(category);
 				}
+			}
 
-				if (line.startsWith("[[Category")) {
-					System.out.println("¥t" + line);
-				}
+			this.counter++;
+			if (this.counter % 1000 == 0) {
+				System.out.println(counter + "データ完了");
 			}
 		}
 		clearTagFlags();
