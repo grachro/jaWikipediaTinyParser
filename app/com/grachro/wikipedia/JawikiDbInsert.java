@@ -16,9 +16,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 
 /**
+ * DB作成
  * <pre>
- * mysql -u xxx -p
- * create database wikipedia_mini;
+ * mysql -u [USER] --password=[PASSWORD]
+ * create database [DB_NAME];
  * use wikipedia_mini;
  * create table page (id int(10),namespace int(2),title varchar(255));
  * create table page_category (id int(10),namespace int(2),title varchar(255),category varchar(255),category_footer varchar(255));
@@ -34,18 +35,22 @@ public class JawikiDbInsert {
 	private static String title = null;
 	private static int totalLine = 0;
 
-	public static void main(String[] args) throws IOException,
-			InstantiationException, IllegalAccessException,
-			ClassNotFoundException, SQLException {
+	public static void main(String[] args) throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 
-		String filePath = "jawiki-20140503-parsed.txt";//jawikiTinyParser.rb で生成したファイル
+		// jawikiTinyParser.rb で生成したファイル
+		String jawikiTinyParserText = args[0];
+
+		// MySQL
+		String dbUrl = args[1];// jdbc:mysql://[HOST]/[DB_NAME]
+		String dbUsr = args[2];// [USER]
+		String dbPassword = args[3];// [PASSWORD]
+
+		String filePath = jawikiTinyParserText;
 		InputStream in = FileUtils.openInputStream(new File(filePath));
 		LineIterator itr = IOUtils.lineIterator(in, "UTF-8");
 
 		Class.forName("com.mysql.jdbc.Driver").newInstance();
-		Connection conn = DriverManager
-				.getConnection("jdbc:mysql://xxx.xxx.xxx.xxx/wikipedia_mini?"
-						+ "user=xxx&password=xxx");
+		Connection conn = DriverManager.getConnection(dbUrl + "?" + "user=" + dbUsr + "&password=" + dbPassword);
 		conn.setAutoCommit(false);
 
 		List<String> errList = new ArrayList<String>();
@@ -54,8 +59,7 @@ public class JawikiDbInsert {
 			int counter = 0;
 
 			PreparedStatement pageStmt = conn.prepareStatement(INSERT_PAGE_SQL);
-			PreparedStatement pageCategoryStmt = conn
-					.prepareStatement(INSERT_PAGE_CATEGORY_SQL);
+			PreparedStatement pageCategoryStmt = conn.prepareStatement(INSERT_PAGE_CATEGORY_SQL);
 			try {
 				while (itr.hasNext()) {
 					String line = itr.next();
@@ -101,8 +105,7 @@ public class JawikiDbInsert {
 		System.out.println("finish.");
 	}
 
-	private static void insert(String line, PreparedStatement pageStmt,
-			PreparedStatement pageCategoryStmt) throws SQLException {
+	private static void insert(String line, PreparedStatement pageStmt, PreparedStatement pageCategoryStmt) throws SQLException {
 		if (line.startsWith("id=")) {
 			String[] lineArray = line.split(",");
 			id = Integer.parseInt(lineArray[0].substring(3));
