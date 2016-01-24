@@ -25,7 +25,7 @@ import org.apache.commons.io.LineIterator;
  * create table page_category (id int(10),namespace int(2),title varchar(255),category varchar(255),category_footer varchar(255));
  * </pre>
  */
-public class JawikiDbInsert {
+public class WikipediaInsertMysql {
 
 	private static final String INSERT_PAGE_SQL = "insert into page (id,namespace,title) value (?,?,?)";
 	private static final String INSERT_PAGE_CATEGORY_SQL = "insert into page_category (id,namespace,title,category,category_footer) value (?,?,?,?,?)";

@@ -28,14 +28,14 @@ import org.xml.sax.helpers.DefaultHandler;
  * bunzip2 jawiki-20140503-pages-meta-current.xml.bz2
  * </pre>
  */
-public class JawikiTinyParser extends DefaultHandler {
+public class WikipediaTinyParser extends DefaultHandler {
 
 	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {
 
 		String inputXml = args[0];
 		String outputFile = args[1];
 
-		new JawikiTinyParser(inputXml, outputFile);
+		new WikipediaTinyParser(inputXml, outputFile);
 	}
 
 	private Pattern CATEGORY_PATTERN = Pattern.compile("\\[\\[Category:.+?\\]\\]");
@@ -53,7 +53,7 @@ public class JawikiTinyParser extends DefaultHandler {
 	private int counter = 0;
 	private OutputStream out;
 
-	public JawikiTinyParser(String inputXml, String outputFile) throws ParserConfigurationException, SAXException, IOException {
+	public WikipediaTinyParser(String inputXml, String outputFile) throws ParserConfigurationException, SAXException, IOException {
 		SAXParserFactory spfactory = SAXParserFactory.newInstance();
 		SAXParser parser = spfactory.newSAXParser();
 
