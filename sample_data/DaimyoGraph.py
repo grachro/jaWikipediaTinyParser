@@ -21,30 +21,11 @@ while line2:
 	line2 = f2.readline()
 f2.close
 
-pos = nx.spring_layout(G)
+pos = nx.spring_layout(G,iterations=100)
 
 
-# find node near center (0.5,0.5)
-dmin=1
-ncenter=0
-for n in pos:
-    x,y=pos[n]
-    d=(x-0.5)**2+(y-0.5)**2
-    if d<dmin:
-        ncenter=n
-        dmin=d
-
-# color by path length from node near center
-p=nx.single_source_shortest_path_length(G,ncenter)
-
-plt.figure(figsize=(8,8))
-nx.draw_networkx_edges(G,pos,nodelist=[ncenter],alpha=0.4)
-nx.draw_networkx_nodes(G,pos,nodelist=p.keys(),
-                       node_size=80,
-                       node_color=[float(v) for v in p.values()],
-                       cmap=plt.cm.Reds_r)
-
-nx.draw_networkx_labels(G,pos,labels,font_size=16)
+nx.draw_networkx_edges(G,pos,width=1.0,alpha=0.4)
+nx.draw_networkx_labels(G,pos,labels,font_size=16,font_family='Osaka')
 
 plt.axis('off') #軸線非表示
 plt.show()
