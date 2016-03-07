@@ -25,14 +25,20 @@ public class WikipediaGetPage extends DefaultHandler {
 
 	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {
 
-		String inputXml = args[0];
+		// wget
+		// http://dumps.wikimedia.org/jawiki/20140503/jawiki-20140503-pages-meta-current.xml.bz2
+		// bunzip2 jawiki-20140503-pages-meta-current.xml.bz2
+		String wikiPagesMetaXmlFilePath = args[0];
 
-		WikipediaGetPage gp = new WikipediaGetPage(inputXml);
-		Page page = gp.getPage("Java");
+		String searchPageTitle = args[1];
+
+		WikipediaGetPage gp = new WikipediaGetPage(wikiPagesMetaXmlFilePath);
+		Page page = gp.getPage(searchPageTitle);
 		System.out.println(page.id);
 		System.out.println(page.title);
 		System.out.println(page.nameSpace);
 		System.out.println(page.currentPageContents);
+
 	}
 
 	private final String xml;
@@ -42,9 +48,11 @@ public class WikipediaGetPage extends DefaultHandler {
 	private String currentTitle = null;
 	private String currentNameSpace = null;
 	private String currentId = null;
-	private StringBuilder currentPageContents = new StringBuilder();
+	private StringBuilder currentPageContents = null;
 
 	private Page page;
+
+	private boolean findHit = false;
 
 	private boolean titleTag = false;
 	private boolean nsTag = false;
@@ -102,7 +110,7 @@ public class WikipediaGetPage extends DefaultHandler {
 
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) {
-		clearTagFlags();
+
 		if ("title".equals(qName)) {
 			this.titleTag = true;
 		} else if ("ns".equals(qName)) {
@@ -119,7 +127,17 @@ public class WikipediaGetPage extends DefaultHandler {
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 
-		if ("page".equals(qName)) {
+		if ("title".equals(qName)) {
+			this.titleTag = false;
+		} else if ("ns".equals(qName)) {
+			this.nsTag = false;
+		} else if ("id".equals(qName)) {
+			this.idTag = false;
+		} else if ("revision".equals(qName)) {
+			this.revisionTag = false;
+		} else if ("text".equals(qName)) {
+			this.textTag = false;
+		} else if ("page".equals(qName)) {
 			if (this.currentTitle.equals(this.findTitle)) {
 				this.page = new Page();
 				this.page.id = this.currentId;
@@ -129,8 +147,9 @@ public class WikipediaGetPage extends DefaultHandler {
 
 				throw new StopException();
 			}
+			this.clearTagFlags();
 		}
-		clearTagFlags();
+
 	}
 
 	private void clearTagFlags() {
@@ -155,14 +174,20 @@ public class WikipediaGetPage extends DefaultHandler {
 	private void parse(String text) throws IOException {
 		if (this.titleTag) {
 			this.currentTitle = text;
+
+			if (this.currentTitle.equals(this.findTitle)) {
+				this.findHit = true;
+				this.currentPageContents = new StringBuilder();
+			}
+
 		} else if (this.nsTag) {
 			this.currentNameSpace = text;
 		} else if (!this.revisionTag && this.idTag) {
-			if (this.findTitle.equals(this.currentTitle)) {
-				this.currentId = text;
-			}
+			this.currentId = text;
 		} else if (this.textTag) {
-			this.currentPageContents.append(text);
+			if (findHit) {
+				this.currentPageContents.append(text);
+			}
 		}
 	}
 
