@@ -2,6 +2,7 @@ package com.grachro.wikipedia;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -14,11 +15,11 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * 概要 Wikipediaで配布されているコンテンツxmlから、タイトルとカテゴリを抜出す簡易パーサです
  * 
- * 対象データ
+ * Kotlin
+ * start:Mon Mar 07 13:49:11 JST 2016
+ * end  :Mon Mar 07 14:00:33 JST 2016
+ * 11分22秒!
  * 
- * <pre>
- * wget http://dumps.wikimedia.org/jawiki/20140503/jawiki-20140503-pages-meta-current.xml.bz2
- * bunzip2 jawiki-20140503-pages-meta-current.xml.bz2
  * </pre>
  */
 public class WikipediaGetPage extends DefaultHandler {
@@ -33,12 +34,17 @@ public class WikipediaGetPage extends DefaultHandler {
 		String searchPageTitle = args[1];
 
 		WikipediaGetPage gp = new WikipediaGetPage(wikiPagesMetaXmlFilePath);
+
+		Date start = new Date();
 		Page page = gp.getPage(searchPageTitle);
 		System.out.println(page.id);
 		System.out.println(page.title);
 		System.out.println(page.nameSpace);
 		System.out.println(page.currentPageContents);
-
+		Date end = new Date();
+		System.out.println("start:" + start);
+		System.out.println("end  :" + end);
+			
 	}
 
 	private final String xml;
