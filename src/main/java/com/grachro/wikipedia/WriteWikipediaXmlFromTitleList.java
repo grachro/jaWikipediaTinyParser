@@ -3,14 +3,13 @@ package com.grachro.wikipedia;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
-/**
- * Wikipediaで配布されているコンテンツxmlから<page></page>を抜き取ります。
- */
-public class WikipediaXmlPagePikerWithDitionaryTsv {
+public class WriteWikipediaXmlFromTitleList {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         System.out.println("dictionaryTsv load start");
 
@@ -20,7 +19,11 @@ public class WikipediaXmlPagePikerWithDitionaryTsv {
 
         String wikiPagesMetaXmlFilePath = args[0];
         String outPutDirPath = args[2];
-        String[] titles = args[3].split(",");
+        String titleFile = args[3];
+
+        List<String> titles = FileUtils.readLines(new File(titleFile));
+
+
 
         File outPutDir = new File(outPutDirPath);
         outPutDir.mkdirs();

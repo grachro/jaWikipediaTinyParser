@@ -19,6 +19,7 @@ def workDirectoryRoot = "${System.getProperty("user.home")}/Documents/wikipedia"
 def wikipediaArticlesXml = "${workDirectoryRoot}/jawiki-20160720-pages-articles.xml"
 def titleDeictionary = "${workDirectoryRoot}/jawiki-title-index-deictionary.tsv"
 def pageXmlDeictionary = "${workDirectoryRoot}/pageXml"
+def titelList = "${workDirectoryRoot}/titelList.txt"
 
 /**
  * gradle createDictionary
@@ -39,4 +40,20 @@ task getPageXml(type: JavaExec) {
         args wikipediaArticlesXml, titleDeictionary, pageXmlDeictionary, project.titles
     }
 
+}
+
+
+task getPageXmlFromTitleList(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main = "com.grachro.wikipedia.WriteWikipediaXmlFromTitleList"
+    args wikipediaArticlesXml, titleDeictionary, pageXmlDeictionary, titelList
+}
+
+
+
+
+task pagePikerFromTitleList(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main = "com.grachro.wikipedia.WikipediaXmlPagePikerFromTitleList"
+    args wikipediaArticlesXml, pageXmlDeictionary, titelList
 }

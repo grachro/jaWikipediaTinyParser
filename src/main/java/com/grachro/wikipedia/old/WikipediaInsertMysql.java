@@ -1,4 +1,4 @@
-package com.grachro.wikipedia;
+package com.grachro.wikipedia.old;
 
 import java.io.File;
 import java.io.IOException;
