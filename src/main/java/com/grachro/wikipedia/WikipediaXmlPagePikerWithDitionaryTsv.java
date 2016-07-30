@@ -1,5 +1,8 @@
 package com.grachro.wikipedia;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -12,10 +15,24 @@ public class WikipediaXmlPagePikerWithDitionaryTsv {
         Map<String, Integer> titleLineDictionary = WikipediaUtils.getDictionaryMap(dictionaryTsv);
 
         String wikiPagesMetaXmlFilePath = args[0];
-        String title = args[2];
+        String outPutDirPath = args[2];
+        String[] titles = args[3].split(",");
 
-        String pageXml = WikipediaUtils.getPageXml(titleLineDictionary, wikiPagesMetaXmlFilePath, title);
-        System.out.println(pageXml);
+        File outPutDir = new File(outPutDirPath);
+        outPutDir.mkdirs();
+
+
+        for(String title : titles) {
+            String pageXml = WikipediaUtils.getPageXml(titleLineDictionary, wikiPagesMetaXmlFilePath, title);
+            File xml = new File(outPutDir,title + ".xml");
+            System.out.println(pageXml);
+
+            try {
+                FileUtils.writeStringToFile(xml, pageXml);
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
