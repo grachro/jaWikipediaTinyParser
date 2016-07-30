@@ -1,20 +1,17 @@
 package com.grachro.wikipedia;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+import java.io.*;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class WikipediaUtils {
+
+
+    private final static Pattern OVERVIEW_PATTERN = Pattern.compile("'''.*?'''（.*?）");
 
     public static void createTitleLineDictionary(String wikiPagesMetaXmlFilePath, String outputFilePath)
             throws IOException {
@@ -134,5 +131,75 @@ public class WikipediaUtils {
         }
 
         return sb.toString();
+    }
+
+
+    public static void getOverViews(String wikiPagesMetaXmlFilePath ,BufferedWriter bw,String titleFile) throws IOException {
+
+
+
+
+
+        Set<String> titles = new HashSet<>(FileUtils.readLines(new File(titleFile)));
+
+        Date start = new Date();
+
+        StringBuilder sb = null;
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new FileReader(wikiPagesMetaXmlFilePath));
+
+            boolean hit = false;
+            String line;
+            String title = null;
+            while ((line = in.readLine()) != null) {
+                if (line.matches(".*<title>.*</title>.*")) {
+                    title = line.trim();
+                    title = title.substring(7, title.length() - 8);
+                    if (!titles.contains(title)) {
+                        continue;
+                    }
+
+                    hit = true;
+                    sb = new StringBuilder("<page>\n");
+                }
+
+                if (hit) {
+                    sb.append(line).append("\n");
+                    if (line.contains("</page>")) {
+
+
+                        Matcher matcher = OVERVIEW_PATTERN.matcher(sb.toString());
+
+
+                        while(matcher.find()) {
+                            String ovierview = matcher.group();
+                            bw.write(ovierview);
+                            bw.newLine();
+                        }
+
+                        hit = false;
+                    }
+                }
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Date end = new Date();
+        System.out.println(sb);
+        System.out.println("start:" + start);
+        System.out.println("end  :" + end);
+        System.out.println("finish");
+
     }
 }

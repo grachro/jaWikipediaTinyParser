@@ -20,6 +20,7 @@ def wikipediaArticlesXml = "${workDirectoryRoot}/jawiki-20160720-pages-articles.
 def titleDeictionary = "${workDirectoryRoot}/jawiki-title-index-deictionary.tsv"
 def pageXmlDeictionary = "${workDirectoryRoot}/pageXml"
 def titelList = "${workDirectoryRoot}/titelList.txt"
+def overviewTextFilePath = "${workDirectoryRoot}/overview.txt"
 
 /**
  * gradle createDictionary
@@ -52,8 +53,29 @@ task getPageXmlFromTitleList(type: JavaExec) {
 
 
 
+/**
+ * gradle pagePikerFromTitleList
+ */
 task pagePikerFromTitleList(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     main = "com.grachro.wikipedia.WikipediaXmlPagePikerFromTitleList"
     args wikipediaArticlesXml, pageXmlDeictionary, titelList
+}
+
+
+/**
+ * gradle GetXmlOverview > overview.tsv
+ *
+ * 最初のこの部分を取り出す
+ * <pre>
+ * '''節分'''（せつぶん/せちぶん）
+ * to
+ * 節分¥tせつぶん/せちぶん
+ *
+ * </pre>
+ */
+task GetXmlOverview(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main = "com.grachro.wikipedia.GetXmlOverview"
+    args wikipediaArticlesXml, overviewTextFilePath, titelList
 }
