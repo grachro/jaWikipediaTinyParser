@@ -14,12 +14,11 @@ public class GetXmlOverview {
 
        String wikiPagesMetaXmlFilePath = args[0];
        String outputFilePath = args[1];
-       String titleFile = args[2];
 
        OutputStream out = FileUtils.openOutputStream(new File(outputFilePath));
        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
        try {
-           WikipediaUtils.getOverViews(wikiPagesMetaXmlFilePath,bw,titleFile);
+           WikipediaUtils.getOverViews(wikiPagesMetaXmlFilePath,bw);
        } finally {
            IOUtils.closeQuietly(bw);
            IOUtils.closeQuietly(out);

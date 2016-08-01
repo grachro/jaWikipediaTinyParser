@@ -64,9 +64,9 @@ task pagePikerFromTitleList(type: JavaExec) {
 
 
 /**
- * gradle GetXmlOverview > overview.tsv
+ * gradle GetXmlOverview
  *
- * 最初のこの部分を取り出す
+ * この部分を取り出す
  * <pre>
  * '''節分'''（せつぶん/せちぶん）
  * to
@@ -77,5 +77,5 @@ task pagePikerFromTitleList(type: JavaExec) {
 task GetXmlOverview(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     main = "com.grachro.wikipedia.GetXmlOverview"
-    args wikipediaArticlesXml, overviewTextFilePath, titelList
+    args wikipediaArticlesXml, overviewTextFilePath
 }

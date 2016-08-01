@@ -134,13 +134,10 @@ public class WikipediaUtils {
     }
 
 
-    public static void getOverViews(String wikiPagesMetaXmlFilePath ,BufferedWriter bw,String titleFile) throws IOException {
+    public static void getOverViews(String wikiPagesMetaXmlFilePath ,BufferedWriter bw) throws IOException {
 
 
-
-
-
-        Set<String> titles = new HashSet<>(FileUtils.readLines(new File(titleFile)));
+        //Set<String> titles = new HashSet<>(FileUtils.readLines(new File(titleFile)));
 
         Date start = new Date();
 
@@ -156,9 +153,6 @@ public class WikipediaUtils {
                 if (line.matches(".*<title>.*</title>.*")) {
                     title = line.trim();
                     title = title.substring(7, title.length() - 8);
-                    if (!titles.contains(title)) {
-                        continue;
-                    }
 
                     hit = true;
                     sb = new StringBuilder("<page>\n");
